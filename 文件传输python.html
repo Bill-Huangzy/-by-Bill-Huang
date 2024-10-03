@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>录音文件传输</title>
+</head>
+
+<body>
+    <h1>欢迎使用录音文件传输网站</h1>
+
+    <!-- 上传文件表单 -->
+    <form id="uploadForm">
+        <input type="file" id="fileInput" name="file">
+        <button type="submit">上传文件</button>
+    </form>
+
+    <!-- 文件列表 -->
+    <ul id="fileList"></ul>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const fileList = document.getElementById('fileList');
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadFiles();
+            });
+        });    <!-- 宝宝我读到这行啦！ -->
+
+        function loadFiles() {
+            fetch('/file')
+            .then(response => response.json())
+            .then(data => {
+                fileList.innerHTML = '';
+                data.files.forEach(file => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${file.filename} 
+                    <a href="/download/${file.filename}" download>下载</a> 
+                    <button onclick="deleteFile('${file.filename}')">删除</button>`;
+                    fileList.appendChild(li); <!-- 宝宝我读到这行啦！but i dont understand why adding sth to an existing list  -->
+                });
+            });
+        }
+
+        function deleteFile(filename) {
+            fetch(`/delete/${filename}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadFiles();
+            });
+        }
+
+        loadFiles();
+    </script>
+</body>
+
+</html>
